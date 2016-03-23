@@ -1,0 +1,6 @@
+- name: apt install packages
+  apt: pkg={{ pkgs }}
+- name: install snihdnat user
+  user: name=snihdnat
+- name: install snihdnatd user
+  user: name=snihdnatd

@@ -1,0 +1,41 @@
+- name: clone data repository
+  git: repo={{ repos.data }} dest=/home/snihdnat/data depth=5
+  register: clone_data
+- name: clone main repository
+  git: repo={{ repos.main }} dest=/opt/46snihdnat/ depth=5
+  register: clone
+- name: npm install
+  npm: path=/opt/46snihdnat
+
+- name: create 46snihdnat/bin
+  file: dest=/home/snihdnat/bin state=directory
+- name: ln bin/46snihdnat-rebuild
+  file: src=/opt/46snihdnat/bin/46snihdnat-rebuild dest=/home/snihdnat/bin/46snihdnat-rebuild state=link
+- name: ln bin/46snihdnat
+  file: src=/opt/46snihdnat/46snihdnat.py dest=/home/snihdnat/bin/46snihdnat state=link
+
+- name: install systemd service files
+  copy: src=systemd/{{ item }} dest=/etc/systemd/system/{{ item }}
+  with_items:
+  - 46snihdnatd.service
+  - 46snihdnat-zones.service
+  - 46snihdnat-zones.timer
+
+- name: enable 46snihdnat
+  file:
+    src: ../{{ item.src }}
+    dest: /etc/systemd/system/{{ item.dest }}
+    state: link
+  with_items:
+  - src: 46snihdnatd.service
+    dest: multi-user.target.wants/46snihdnatd.service
+  - src: 46snihdnat-zones.timer
+    dest: timers.target.wants/46snihdnat-zones.timer
+
+- service: name=46snihdnatd state=restarted
+  when: clone.changed
+
+- service: name={{ item }} state=started
+  with_items:
+  - 46snihdnatd.service
+  - 46snihdnat-zones.timer

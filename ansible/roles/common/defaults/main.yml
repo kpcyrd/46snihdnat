@@ -1,0 +1,12 @@
+---
+pkgs:
+- aptitude
+- vim
+- lsof
+- git
+- nodejs
+- vnstat
+- nload
+- tcpdump
+- python3
+- npm
