@@ -1,0 +1,7 @@
+- name: deploy
+  hosts: all
+  gather_facts: no
+  roles:
+  - common
+  - nsd
+  - 46snihdnat

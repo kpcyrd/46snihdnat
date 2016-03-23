@@ -1,0 +1,8 @@
+- apt: pkg=nsd
+- name: adjust hamburgmesh.net.zone permissions
+  file: path=/etc/nsd/hamburgmesh.net.zone owner=root group=snihdnat mode=0664
+- name: allow zone reload to snihdnat
+  lineinfile:
+    dest: /etc/sudoers
+    regexp: '^snihdnat'
+    line: 'snihdnat ALL=(ALL) NOPASSWD: /usr/sbin/nsd-control reload hamburgmesh.net'
