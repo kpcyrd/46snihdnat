@@ -1,0 +1,4 @@
+---
+whitelist:
+  dest:
+    - ::/0

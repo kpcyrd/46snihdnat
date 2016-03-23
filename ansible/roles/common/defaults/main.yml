@@ -10,3 +10,4 @@ pkgs:
 - tcpdump
 - python3
 - npm
+- netfilter-persistent
