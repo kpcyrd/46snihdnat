@@ -1,0 +1,7 @@
+[Unit]
+Description=46snihdnat: rebuild zone
+
+[Service]
+Type=oneshot
+User=snihdnat
+ExecStart=/home/snihdnat/bin/46snihdnat-rebuild

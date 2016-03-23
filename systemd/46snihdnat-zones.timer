@@ -1,0 +1,8 @@
+[Unit]
+Description=46snihdnat: rebuild zone timer
+
+[Timer]
+OnUnitActiveSec=15min
+
+[Install]
+WantedBy=timers.target

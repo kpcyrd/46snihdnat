@@ -1,0 +1,14 @@
+{
+  "name": "46snihdnat",
+  "version": "0.0.0",
+  "description": "4 to 6 server name indication hybrid destination network address translation",
+  "main": "46snihdnatd.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "kpcyrd <git@rxv.cc>",
+  "license": "GPL-3.0",
+  "dependencies": {
+    "binary-parser": "^1.1.5"
+  }
+}

@@ -1,0 +1,12 @@
+[Unit]
+Description=46snihdnat: 4 to 6 server name indication hybrid destination network address translation
+After=network.target
+
+[Service]
+Type=simple
+Restart=always
+User=snihdnatd
+ExecStart=/opt/46snihdnat/46snihdnatd.js
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,4 @@
+#!/bin/sh
+git -C ~/data pull
+~/bin/46snihdnat ~/data/*.zone > /etc/nsd/hamburgmesh.net.zone
+sudo nsd-control reload hamburgmesh.net
