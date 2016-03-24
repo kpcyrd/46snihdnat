@@ -1,10 +1,10 @@
 - name: clone data repository
   git: repo={{ repos.data }} dest=/home/snihdnat/data depth=5
   register: clone_data
-- name: clone main repository
-  git: repo={{ repos.main }} dest=/opt/46snihdnat/ depth=5
   become: yes
   become_user: snihdnat
+- name: clone main repository
+  git: repo={{ repos.main }} dest=/opt/46snihdnat/ depth=5
   register: clone
 - name: npm install
   npm: path=/opt/46snihdnat
