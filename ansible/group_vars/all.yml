@@ -1,4 +1,5 @@
 ---
 whitelist:
   dests:
-    - ::/0
+    # Foerderverein Freie Netzwerke
+    - 2001:bf7::/32
