@@ -5,8 +5,8 @@
 :PROXY - [0:0]
 -A INPUT -i lo -j ACCEPT
 -A OUTPUT -o lo -j ACCEPT
--A OUTPUT -m owner --owner-uid snihdnatd -j PROXY
--A OUTPUT -m owner --owner-uid snihdnatd -j REJECT
+-A OUTPUT -m owner --uid-owner snihdnatd -j PROXY
+-A OUTPUT -m owner --uid-owner snihdnatd -j REJECT
 {% for x in whitelist.dests %}
 -A PROXY -p tcp -d {{ x }} --dport 80 -j ACCEPT
 -A PROXY -p tcp -d {{ x }} --dport 443 -j ACCEPT

@@ -4,3 +4,12 @@
   user: name=snihdnat
 - name: install snihdnatd user
   user: name=snihdnatd
+- name: installing firewall
+  template: src={{ item }} dest=/etc/iptables/{{ item }}
+  with_items:
+  - rules.v4
+  - rules.v6
+  register: firewall
+- name: restarting firewall
+  service: name=netfilter-persistent state=restarted enabled=true
+  when: firewall.changed
