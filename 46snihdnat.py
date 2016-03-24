@@ -3,7 +3,7 @@ import sys
 import re
 
 opts = dict(
-    origin='hamburgmesh.net',
+    origin='hamburgmesh.net.',
     ttl=1800,
     ns='46ns.rxv.cc.',
     admin='admin.rxv.cc.',
