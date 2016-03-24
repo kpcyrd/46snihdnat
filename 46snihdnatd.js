@@ -41,19 +41,24 @@ var helloParser = new Parser()
 	;
 
 function extractSni(connection, cb) {
-	var buffer = Buffer([]);
+    var buffer = Buffer([]);
 
-	var onData = function(data) {
-		console.log('[ $ ] onData triggerd');
-		buffer = Buffer.concat([buffer, data]);
-		var sni = getSni(buffer);
-		if(sni) {
-			console.log('[ $ ] sni found: %s, finishing', sni);
-			connection.removeListener('data', onData);
-			cb(buffer, sni);
-		}
-	};
-	connection.on('data', onData);
+    var onData = function(data) {
+        console.log('[ $ ] onData triggerd');
+        buffer = Buffer.concat([buffer, data]);
+        try {
+            var sni = getSni(buffer);
+        } catch(err) {
+            connection.end();
+            return;
+        }
+        if(sni) {
+            console.log('[ $ ] sni found: %s, finishing', sni);
+            connection.removeListener('data', onData);
+            cb(buffer, sni);
+        }
+    };
+    connection.on('data', onData);
 };
 
 function getExtensions(buffer) {
@@ -125,6 +130,10 @@ http.createServer(function(req, res) {
         }, function(proxy_res) {
             res.writeHead(proxy_res.statusCode, proxy_res.headers);
             proxy_res.pipe(res);
+        })
+        .on('error', function() {
+            console.log('[///] request failed');
+            res.destroy();
         });
 
         req.pipe(proxy_req);
@@ -146,8 +155,7 @@ net.createServer(function(c) {
 			});
 			client.on('error', function() {
 				console.log('[///] closing connection');
-				client.close();
-				c.close();
+				c.end();
 			});
 			client.on('close', function() {
 				console.log('[ / ] connection got closed');
@@ -155,8 +163,8 @@ net.createServer(function(c) {
 		});
 
 		c.on('error', function() {
-			if(client && client.close) client.close();
-			if(c && c.close) c.close();
+			if(client) client.end();
+			c.end();
 		});
 	});
 
