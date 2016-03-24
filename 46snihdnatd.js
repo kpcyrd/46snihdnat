@@ -104,14 +104,20 @@ function nextSni(buffer, offset) {
 		.parse(buffer).sni;
 };
 
-net.createServer(function(c) {
-	extractSni(c, function(buffered, name) {
-		var client;
+function resolve(name, cb) {
 		dns.resolve(name, 'AAAA', function(err, addresses) {
 			if(err || !addresses) return console.log('[%%%%%%] didn\'t resolve', err);
 			console.log('[ % ] resolved to %s', addresses);
-			console.log('[!!!] connecting to %s:%d', addresses[0], 443);
-			client = net.createConnection(443, addresses[0], function() {
+            cb(addresses[0]);
+        });
+};
+
+net.createServer(function(c) {
+	extractSni(c, function(buffered, name) {
+		var client;
+        resolve(name, function(address) {
+			console.log('[!!!] connecting to %s:%d', address, 443);
+			client = net.createConnection(443, address, function() {
 				console.log('[ ! ] connected');
 				client.write(buffered);
 				client.pipe(c);
@@ -135,5 +141,5 @@ net.createServer(function(c) {
 
 	console.log('[ + ] got client');
 }).listen(8443, function() {
-	console.log('[###] waiting...')
+    console.log('[###] waiting for sni on :8443');
 });
