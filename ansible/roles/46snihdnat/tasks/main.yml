@@ -3,6 +3,8 @@
   register: clone_data
 - name: clone main repository
   git: repo={{ repos.main }} dest=/opt/46snihdnat/ depth=5
+  become: yes
+  become_user: snihdnat
   register: clone
 - name: npm install
   npm: path=/opt/46snihdnat
