@@ -1,5 +1,6 @@
 #!/usr/bin/env nodejs
 var net = require('net');
+var http = require('http');
 var dns = require('dns');
 var Parser = require('binary-parser').Parser;
 
@@ -111,6 +112,27 @@ function resolve(name, cb) {
             cb(addresses[0]);
         });
 };
+
+http.createServer(function(req, res) {
+    resolve(req.headers['host'], function(address) {
+        var proxy_req = http.request({
+            host: address,
+            port: 80,
+            family: 6,
+            method: req.method,
+            path: req.url,
+            hostname: req.headers['host'],
+            headers: req.headers
+        }, function(proxy_res) {
+            res.writeHead(proxy_res.statusCode, proxy_res.headers);
+            proxy_res.pipe(res);
+        });
+
+        req.pipe(proxy_req);
+    });
+}).listen(8080, function() {
+    console.log('[###] waiting for http on :8080');
+});
 
 net.createServer(function(c) {
 	extractSni(c, function(buffered, name) {
