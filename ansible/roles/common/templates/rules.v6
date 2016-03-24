@@ -4,6 +4,8 @@
 :OUTPUT ACCEPT [0:0]
 :PROXY - [0:0]
 -A INPUT -i lo -j ACCEPT
+-A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+-A INPUT -p icmpv6 -j ACCEPT
 -A OUTPUT -o lo -j ACCEPT
 -A OUTPUT -m owner --uid-owner snihdnatd -j PROXY
 -A OUTPUT -m owner --uid-owner snihdnatd -j REJECT
