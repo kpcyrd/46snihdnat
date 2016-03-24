@@ -32,8 +32,8 @@ tls connections are passed through based on the sni extension in ClientHello.  T
 Let's encrypt
 -------------
 
-- http-01: supported, untested. Configure webroot plugin correctly.
-- tls-sni-01: experimental, untested.
+- http-01: supported, tested. Configure webroot plugin correctly.
+- tls-sni-01: unsupported
 
 License
 -------
