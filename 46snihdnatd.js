@@ -121,7 +121,6 @@ http.createServer(function(req, res) {
             family: 6,
             method: req.method,
             path: req.url,
-            hostname: req.headers['host'],
             headers: req.headers
         }, function(proxy_res) {
             res.writeHead(proxy_res.statusCode, proxy_res.headers);
