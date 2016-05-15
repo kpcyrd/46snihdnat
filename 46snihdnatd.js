@@ -143,8 +143,9 @@ http.createServer(function(req, res) {
 });
 
 net.createServer(function(c) {
+    var client;
+
     extractSni(c, function(buffered, name) {
-        var client;
         resolve(name, function(address) {
             console.log('[!!!] connecting to %s:%d', address, 443);
             client = net.createConnection(443, address, function() {
@@ -154,7 +155,7 @@ net.createServer(function(c) {
                 c.pipe(client);
             });
             client.on('error', function() {
-                console.log('[///] closing connection');
+                console.log('[///] remote disconnected');
                 c.end();
             });
             client.on('close', function() {
@@ -162,10 +163,12 @@ net.createServer(function(c) {
             });
         });
 
-        c.on('error', function() {
-            if(client) client.end();
-            c.end();
-        });
+    });
+
+    c.on('error', function() {
+        console.log('[///] client disconnected');
+        if(client) client.end();
+        c.end();
     });
 
     console.log('[ + ] got client');
