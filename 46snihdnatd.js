@@ -172,13 +172,15 @@ net.createServer(function(c) {
     var client;
     console.log('[ * ] got tls connection');
 
+    var writeback;
     extractSni(c).then(function(sni) {
+        writeback = sni.buffered;
         return dns_resolve(sni.name);
     }).then(function(address) {
         console.log('[!!!] connecting to [%s]:%d', address, 443);
         client = net.createConnection(443, address, function() {
             console.log('[ ! ] connected');
-            client.write(sni.buffered);
+            client.write(writeback);
             client.pipe(c);
             c.pipe(client);
         });
