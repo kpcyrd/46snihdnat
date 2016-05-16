@@ -173,24 +173,21 @@ net.createServer(function(c) {
     console.log('[ * ] got tls connection');
 
     extractSni(c).then(function(sni) {
-        dns_resolve(sni.name).then(function(address) {
-            console.log('[!!!] connecting to [%s]:%d', address, 443);
-            client = net.createConnection(443, address, function() {
-                console.log('[ ! ] connected');
-                client.write(sni.buffered);
-                client.pipe(c);
-                c.pipe(client);
-            });
-            client.on('error', function() {
-                console.log('[///] remote disconnected');
-                c.end();
-            });
-            client.on('close', function() {
-                console.log('[ / ] connection got closed');
-            });
-        }).catch(function(err) {
-            console.log('[%%%%%%] resolve failed, closing');
+        return dns_resolve(sni.name);
+    }).then(function(address) {
+        console.log('[!!!] connecting to [%s]:%d', address, 443);
+        client = net.createConnection(443, address, function() {
+            console.log('[ ! ] connected');
+            client.write(sni.buffered);
+            client.pipe(c);
+            c.pipe(client);
+        });
+        client.on('error', function() {
+            console.log('[///] remote disconnected');
             c.end();
+        });
+        client.on('close', function() {
+            console.log('[ / ] connection got closed');
         });
     }).catch(function() {
         console.log('[***] rejecting connection');
