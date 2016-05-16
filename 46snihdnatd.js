@@ -128,6 +128,7 @@ function dns_resolve(name, cb) {
 };
 
 http.createServer(function(req, res) {
+    console.log('[ * ] got http connection');
     dns_resolve(req.headers['host']).then(function(address) {
         var proxy_req = http.request({
             host: address,
@@ -147,7 +148,7 @@ http.createServer(function(req, res) {
 
         req.pipe(proxy_req);
     }).catch(function(err) {
-        console.log('[%%%] resolve failed, closing');
+        console.log('[%%%%%%] resolve failed, closing');
         c.end();
     });
 }).listen(8080, function() {
@@ -156,6 +157,7 @@ http.createServer(function(req, res) {
 
 net.createServer(function(c) {
     var client;
+    console.log('[ * ] got tls connection');
 
     extractSni(c, function(buffered, name) {
         dns_resolve(name).then(function(address) {
@@ -174,7 +176,7 @@ net.createServer(function(c) {
                 console.log('[ / ] connection got closed');
             });
         }).catch(function(err) {
-            console.log('[%%%] resolve failed, closing');
+            console.log('[%%%%%%] resolve failed, closing');
             c.end();
         });
     });
