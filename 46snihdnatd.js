@@ -3,6 +3,7 @@ var net = require('net');
 var http = require('http');
 var dns = require('dns');
 var Parser = require('binary-parser').Parser;
+var Promise = require('promise');
 
 
 var Extension = Parser.start()
@@ -110,16 +111,24 @@ function nextSni(buffer, offset) {
         .parse(buffer).sni;
 };
 
-function resolve(name, cb) {
+function dns_resolve(name, cb) {
+    return new Promise(function(resolve, reject) {
+        console.log('[ $ ] resolving', name);
         dns.resolve(name, 'AAAA', function(err, addresses) {
-            if(err || !addresses) return console.log('[%%%%%%] didn\'t resolve', err);
-            console.log('[ % ] resolved to %s', addresses);
-            cb(addresses[0]);
+            if(err || !addresses.length) {
+                console.log('[%%%%%%] resolve failed', name, err);
+                reject(err);
+            } else {
+                var address = addresses[0];
+                console.log('[ %% ] resolved to %s -> %s', addresses, address);
+                resolve(address);
+            }
         });
+    });
 };
 
 http.createServer(function(req, res) {
-    resolve(req.headers['host'], function(address) {
+    dns_resolve(req.headers['host']).then(function(address) {
         var proxy_req = http.request({
             host: address,
             port: 80,
@@ -137,6 +146,9 @@ http.createServer(function(req, res) {
         });
 
         req.pipe(proxy_req);
+    }).catch(function(err) {
+        console.log('[%%%] resolve failed, closing');
+        c.end();
     });
 }).listen(8080, function() {
     console.log('[###] waiting for http on :8080');
@@ -146,8 +158,8 @@ net.createServer(function(c) {
     var client;
 
     extractSni(c, function(buffered, name) {
-        resolve(name, function(address) {
-            console.log('[!!!] connecting to %s:%d', address, 443);
+        dns_resolve(name).then(function(address) {
+            console.log('[!!!] connecting to [%s]:%d', address, 443);
             client = net.createConnection(443, address, function() {
                 console.log('[ ! ] connected');
                 client.write(buffered);
@@ -161,8 +173,10 @@ net.createServer(function(c) {
             client.on('close', function() {
                 console.log('[ / ] connection got closed');
             });
+        }).catch(function(err) {
+            console.log('[%%%] resolve failed, closing');
+            c.end();
         });
-
     });
 
     c.on('error', function() {
