@@ -9,6 +9,7 @@
   "author": "kpcyrd <git@rxv.cc>",
   "license": "GPL-3.0",
   "dependencies": {
-    "binary-parser": "^1.1.5"
+    "binary-parser": "^1.1.5",
+    "promise": "^7.1.1"
   }
 }
