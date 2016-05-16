@@ -135,6 +135,11 @@ function dns_resolve(name) {
     });
 };
 
+var http502 = function(res, msg) {
+    res.writeHead(502);
+    res.end('46snihdnat: ' + msg);
+};
+
 http.createServer(function(req, res) {
     console.log('[ * ] got http connection');
     dns_resolve(req.headers['host']).then(function(address) {
@@ -157,7 +162,7 @@ http.createServer(function(req, res) {
         req.pipe(proxy_req);
     }).catch(function(err) {
         console.log('[%%%%%%] resolve failed, closing');
-        c.end();
+        http502('AAAA lookup failed');
     });
 }).listen(8080, function() {
     console.log('[###] waiting for http on :8080');
