@@ -41,25 +41,30 @@ var helloParser = new Parser()
     .buffer('ext', {length: 'ext_len'});
     ;
 
-function extractSni(connection, cb) {
-    var buffer = Buffer([]);
+function extractSni(connection) {
+    return new Promise(function(resolve, reject) {
+        var buffer = Buffer([]);
 
-    var onData = function(data) {
-        console.log('[ $ ] onData triggerd');
-        buffer = Buffer.concat([buffer, data]);
-        try {
-            var sni = getSni(buffer);
-        } catch(err) {
-            connection.end();
-            return;
-        }
-        if(sni) {
-            console.log('[ $ ] sni found: %s, finishing', sni);
-            connection.removeListener('data', onData);
-            cb(buffer, sni);
-        }
-    };
-    connection.on('data', onData);
+        var onData = function(data) {
+            console.log('[ $ ] onData triggerd');
+            buffer = Buffer.concat([buffer, data]);
+            try {
+                var sni = getSni(buffer);
+            } catch(err) {
+                console.log('[$$$] parsing failed, rejecting');
+                return reject();
+            }
+            if(sni) {
+                console.log('[ $ ] sni found', sni);
+                connection.removeListener('data', onData);
+                return resolve(buffer, sni);
+            } else {
+                console.log('[$$$] invalid sni, rejecting');
+                return reject();
+            }
+        };
+        connection.on('data', onData);
+    });
 };
 
 function getExtensions(buffer) {
@@ -111,7 +116,7 @@ function nextSni(buffer, offset) {
         .parse(buffer).sni;
 };
 
-function dns_resolve(name, cb) {
+function dns_resolve(name) {
     return new Promise(function(resolve, reject) {
         console.log('[ $ ] resolving', name);
         dns.resolve(name, 'AAAA', function(err, addresses) {
@@ -159,7 +164,7 @@ net.createServer(function(c) {
     var client;
     console.log('[ * ] got tls connection');
 
-    extractSni(c, function(buffered, name) {
+    extractSni(c).then(function(buffered, name) {
         dns_resolve(name).then(function(address) {
             console.log('[!!!] connecting to [%s]:%d', address, 443);
             client = net.createConnection(443, address, function() {
@@ -179,6 +184,9 @@ net.createServer(function(c) {
             console.log('[%%%%%%] resolve failed, closing');
             c.end();
         });
+    }).catch(function() {
+        console.log('[***] rejecting connection');
+        c.end();
     });
 
     c.on('error', function() {
@@ -186,8 +194,6 @@ net.createServer(function(c) {
         if(client) client.end();
         c.end();
     });
-
-    console.log('[ + ] got client');
 }).listen(8443, function() {
     console.log('[###] waiting for sni on :8443');
 });
