@@ -137,7 +137,7 @@ function dns_resolve(name) {
 
 var http502 = function(res, msg) {
     res.writeHead(502);
-    res.end('46snihdnat: ' + msg);
+    res.end(res, '46snihdnat: ' + msg + '\n');
 };
 
 http.createServer(function(req, res) {
