@@ -57,7 +57,10 @@ function extractSni(connection) {
             if(sni) {
                 console.log('[ $ ] sni found', sni);
                 connection.removeListener('data', onData);
-                return resolve(buffer, sni);
+                return resolve({
+                    buffered: buffer,
+                    name: sni
+                });
             } else {
                 console.log('[$$$] invalid sni, rejecting');
                 return reject();
@@ -164,12 +167,12 @@ net.createServer(function(c) {
     var client;
     console.log('[ * ] got tls connection');
 
-    extractSni(c).then(function(buffered, name) {
-        dns_resolve(name).then(function(address) {
+    extractSni(c).then(function(sni) {
+        dns_resolve(sni.name).then(function(address) {
             console.log('[!!!] connecting to [%s]:%d', address, 443);
             client = net.createConnection(443, address, function() {
                 console.log('[ ! ] connected');
-                client.write(buffered);
+                client.write(sni.buffered);
                 client.pipe(c);
                 c.pipe(client);
             });
