@@ -136,7 +136,7 @@ function dns_resolve(name) {
 };
 
 var http502 = function(res, msg) {
-    res.writeHead(502);
+    res.writeHead(502, {'Content-Type': 'text/plain'});
     res.end(res, '46snihdnat: ' + msg + '\n');
 };
 
@@ -162,7 +162,7 @@ http.createServer(function(req, res) {
         req.pipe(proxy_req);
     }).catch(function(err) {
         console.log('[%%%%%%] resolve failed, closing');
-        http502('AAAA lookup failed');
+        http502(res, 'AAAA lookup failed');
     });
 }).listen(8080, function() {
     console.log('[###] waiting for http on :8080');
